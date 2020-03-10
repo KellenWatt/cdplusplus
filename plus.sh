@@ -24,84 +24,64 @@
 # worth. If you need a robust automation system, there are plenty out there.   #
 ####!WARNING!#######!WARNING!#######!WARNING!#######!WARNING!#######!WARNING!###
 
-onexit="onexit.cd"
-onenter="onenter.cd"
-
-override=false
+cdpp_onexit="onexit.cd"
+cdpp_onenter="onenter.cd"
+cdpp_builtin=""
 
 if [[ "$1" == "-o" ]] ; then 
-    override=true
+    cdpp_builtin="builtin"
     shift
 fi
 
-# options: cd, pop, push
-method="$1"
+cdpp_method="$1"
+cdpp_targetfile="$2"
 
-case $method in
+if [[ -z $cdpp_targetfile ]] ; then
+    cdpp_targetfile=~
+else 
+    cdpp_targetfile=$(realpath $2)
+fi
+
+case $cdpp_method in
+cd)
+    if [[ -e $cdpp_targetfile && $cdpp_targetfile != $PWD* && -e $cdpp_onexit ]] ; then
+        source $cdpp_onexit
+    fi
+
+    $cdpp_builtin cd $cdpp_targetfile
+
+    if [[ $? == 0 && -e $cdpp_onenter ]] ; then
+        source $cdpp_onenter
+    fi
+    ;;
 pop)
-    stack_size=$(dirs -p | wc -l)
-    if [[ $stack_size -gt 1 && -e "$onexit" ]] ; then
-        source "$onexit"
-    fi
-    
-    if $override ; then
-        builtin popd
-    else
-        popd
+    cdpp_stacksize=$(dirs -p | wc -l)
+    if [[ $cdpp_stacksize -gt 1 ]] ; then
+        cdpp_targetfile=$(dirs +1)
+        if [[ $cdpp_targetfile != $PWD* && -e $cdpp_onexit ]] ; then
+            source $cdpp_onexit
+        fi
     fi
 
-    if [[ $? -eq 0 && -e "$onenter" ]] ; then
-        source "$onenter"
+    $cdpp_builtin popd
+    
+    if [[ $? == 0 && -e $cdpp_onenter ]] ; then
+        source $cdpp_onenter
     fi
     ;;
 push)
-    if [[ -e "$2" && -e "$onexit" ]] ; then
-        source "$onexit"
+    cdpp_targetfile=$2  #intentionally no quotes.
+    if [[ -e $cdpp_targetfile && $cdpp_targetfile != $PWD* && -e $cdpp_onexit ]] ; then
+        source $cdpp_onexit
     fi
 
-    if $override ; then
-        if [[ "$2" == "" ]] ; then
-            builtin pushd
-        else
-            builtin pushd "$2"
-        fi
-    else
-        if [[ "$2" == "" ]] ; then
-            pushd
-        else
-            pushd "$2"
-        fi
-    fi
-    
-    if [[ $? -eq 0 && -e "$onenter" ]] ; then
-        source "$onenter"
-    fi
-    ;;
-cd)
-    if [[ -e "$2" && -e "$onexit" ]] ; then
-        source "$onexit"
+    $cdpp_builtin pushd $cdpp_targetfile
+
+    if [[ $? == 0 && -e $cdpp_onenter ]] ; then
+        source $cdpp_onenter
     fi
 
-
-    if $override ; then
-        if [[ "$2" == "" ]] ; then
-            builtin cd
-        else
-            builtin cd "$2"
-        fi
-    else
-        if [[ "$2" == "" ]] ; then
-            cd
-        else
-            cd "$2"
-        fi
-    fi
-
-    if [[ $? -eq 0 && -e "$onenter" ]] ; then
-        source "$onenter"
-    fi
-    ;;
-*)
-    echo "Invalid directory change method provided" >&2
     ;;
 esac
+
+unset ${!cdpp_@}
