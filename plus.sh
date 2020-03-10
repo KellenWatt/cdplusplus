@@ -50,7 +50,7 @@ cd)
 
     $cdpp_builtin cd $cdpp_targetfile
 
-    if [[ $? == 0 && -e $cdpp_onenter ]] ; then
+    if [[ $? == 0 && -e $cdpp_onenter && $OLDPWD != $PWD* ]] ; then
         source $cdpp_onenter
     fi
     ;;
@@ -65,7 +65,7 @@ pop)
 
     $cdpp_builtin popd
     
-    if [[ $? == 0 && -e $cdpp_onenter ]] ; then
+    if [[ $? == 0 && -e $cdpp_onenter && $OLDPWD != $PWD* ]] ; then
         source $cdpp_onenter
     fi
     ;;
@@ -77,7 +77,7 @@ push)
 
     $cdpp_builtin pushd $cdpp_targetfile
 
-    if [[ $? == 0 && -e $cdpp_onenter ]] ; then
+    if [[ $? == 0 && -e $cdpp_onenter && $OLDPWD != $PWD* ]] ; then
         source $cdpp_onenter
     fi
 

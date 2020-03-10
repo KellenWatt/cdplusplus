@@ -28,9 +28,6 @@ at any time by editing `plus.sh`, and adjusting the `cdpp_onenter` and/or `cdpp_
 accordingly. When the script is used to change directories, it looks for if these files exist, and 
 `source`s them.
 
-As it stands, `onenter.cd` will be sourced every time you enter the directory from any location. As such, 
-functions or variables that aggregate are not recommended
-
 ## Usage
 Now this has been pretty simple up to this point, but there are some basic usage notes to be aware of. 
 As most people who have tried to "rewrite" `cd` can probably tell you, if you call your function/script 
