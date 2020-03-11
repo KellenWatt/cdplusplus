@@ -91,6 +91,7 @@ function cdpp_traverse {
 
 cdpp_method="$1"
 cdpp_targetfile=$2
+cdpp_olddir=$PWD
 
 case $cdpp_method in
 cd)
@@ -125,6 +126,7 @@ push)
     fi
     ;;
 esac
+OLDPWD=$cdpp_olddir
 
 unset ${!cdpp_@}
 unset -f $(compgen -A function cdpp_)
