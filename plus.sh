@@ -33,54 +33,96 @@ if [[ "$1" == "-o" ]] ; then
     shift
 fi
 
-cdpp_method="$1"
-cdpp_targetfile="$2"
 
-if [[ -z $cdpp_targetfile ]] ; then
-    cdpp_targetfile=~
-else 
-    cdpp_targetfile=$(realpath $2)
-fi
+function cdpp_onenter_hook {
+    if [[ -e $cdpp_onenter ]] ; then
+        source $cdpp_onenter
+    fi
+}
+
+function cdpp_onexit_hook {
+    if [[ -e $cdpp_onexit ]] ; then
+        source $cdpp_onexit
+    fi
+}
+
+
+# arguments:
+#   1. targetdirectory
+# assumes argument is a valid target
+function cdpp_traverse {
+    IFS="/" read -a cdpp_targetfile_break <<< "$1"
+    cdpp_currentdir=$PWD
+    if [[ -z ${cdpp_targetfile_break[0]} ]] ; then
+        # echo absolute
+        # Absolute filepath
+        while [[ $1 != $cdpp_currentdir* ]] ; do
+            cdpp_onexit_hook
+            $cdpp_builtin cd ..
+            cdpp_currentdir=$PWD
+        done
+
+        IFS="/" read -a cdpp_tmp <<< "$cdpp_currentdir"
+        cdpp_currentdir_depth=${#cdpp_tmp[@]}
+        cdpp_targetfile_trimmed=${cdpp_targetfile_break[@]:$cdpp_currentdir_depth}
+
+        for dir in ${cdpp_targetfile_trimmed[@]} ; do
+            $cdpp_builtin cd $dir
+            cdpp_onenter_hook
+        done
+    else
+        # echo relative
+        # relative filepath
+        for dir in ${cdpp_targetfile_break[@]} ; do
+            if [[ "$dir" == ".." ]] ; then
+                cdpp_onexit_hook
+            fi
+
+            $cdpp_builtin cd $dir
+            
+            if [[ "$dir" != ".." ]] ; then
+                cdpp_onenter_hook
+            fi
+        done
+    fi
+}
+
+
+
+cdpp_method="$1"
+cdpp_targetfile=$2
 
 case $cdpp_method in
 cd)
-    if [[ -e $cdpp_targetfile && $cdpp_targetfile != $PWD* && -e $cdpp_onexit ]] ; then
-        source $cdpp_onexit
-    fi
-
-    $cdpp_builtin cd $cdpp_targetfile
-
-    if [[ $? == 0 && -e $cdpp_onenter && $OLDPWD != $PWD* ]] ; then
-        source $cdpp_onenter
+    if [[ ! -d $cdpp_targetfile ]] ; then
+        # we want this to fail like a normal cd, so attempt without activating hooks
+        $cdpp_builtin cd $cdpp_targetfile
+    else 
+        # we know the target is valid, so we can start activating hooks
+        cdpp_traverse $cdpp_targetfile
     fi
     ;;
 pop)
+    # ensure there is a directory to pop to
     cdpp_stacksize=$(dirs -p | wc -l)
     if [[ $cdpp_stacksize -gt 1 ]] ; then
         cdpp_targetfile=$(dirs +1)
-        if [[ $cdpp_targetfile != $PWD* && -e $cdpp_onexit ]] ; then
-            source $cdpp_onexit
-        fi
+        # Adding eval resolves any "~" in filepath, making it always act like an absolute traversal
+        cdpp_traverse $(eval echo "$cdpp_targetfile")
     fi
 
+    # does nothing on success, generates proper error on failure
     $cdpp_builtin popd
-    
-    if [[ $? == 0 && -e $cdpp_onenter && $OLDPWD != $PWD* ]] ; then
-        source $cdpp_onenter
-    fi
     ;;
 push)
+    cdpp_origin=$PWD
     cdpp_targetfile=$2  #intentionally no quotes.
-    if [[ -e $cdpp_targetfile && $cdpp_targetfile != $PWD* && -e $cdpp_onexit ]] ; then
-        source $cdpp_onexit
-    fi
-
     $cdpp_builtin pushd $cdpp_targetfile
 
-    if [[ $? == 0 && -e $cdpp_onenter && $OLDPWD != $PWD* ]] ; then
-        source $cdpp_onenter
+    if [[ $? == 0 ]] ; then
+        $cdpp_builtin cd $cdpp_origin
+        cdpp_traverse $cdpp_targetfile
     fi
-
     ;;
 esac
 
