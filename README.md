@@ -49,7 +49,7 @@ If you introduce variables or functions in `onenter.cd`, it's prudent to unset t
 `onexit.cd`, especially if they apply strictly to that directory and its children. This is to reduce 
 inconvenient collisions with other programs on the computer. 
 
-A handy way to do this is to prefix everythingi in a certain script with a specific string, then run these 
+A handy way to do this is to prefix everything in a certain script with a specific string, then run these 
 two commands in `onexit.cd`:
 ```
 unset ${!<prefix>@}
