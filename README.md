@@ -39,9 +39,23 @@ Further information on some design suggestions and useful tidbits are in the com
 script. Reading the source file is highly encouraged, as there is no help text at this time (and sourcing 
 code you aren't familiar with is a super bad idea).
 
-As a footnote, given it's scripted nature, cd++, and any functions it provides, are extremely slow compared 
-to their built-in counterparts. This slowdown, while signficant, is largely unnoticable for command-line 
-work, but could matter in a time-sensitve script, especially one that does a lot of directory-hopping.
+### Tips
+Given it's scripted nature, any functions cd++ provides are extremely slow compared to their built-in 
+counterparts. This slowdown, while signficant, is largely unnoticable for command-line work and will be 
+dwarfed by any hook scripts that are run, but it could matter in a time-sensitve script, especially one 
+that does a lot of directory-hopping.
+
+If you introduce variables or functions in `onenter.cd`, it's prudent to unset them or undo any changes in 
+`onexit.cd`, especially if they apply strictly to that directory and its children. This is to reduce 
+inconvenient collisions with other programs on the computer. 
+
+A handy way to do this is to prefix everythingi in a certain script with a specific string, then run these 
+two commands in `onexit.cd`:
+```
+unset ${!<prefix>@}
+unset -f $(compgen -A function <prefix>) 
+```
+where `<prefix>` is whatever prefix you use.
 
 ### Options
 At the present moment, there are 3 options for changing directories:
@@ -65,9 +79,9 @@ alias push='/<path>/<to>/plus.sh push'
 ```
 
 # WARNING
-This might've occured to you already, but this script can do some major nasty damage if you're not 
-careful. As a precaution, **NEVER** run this with `sudo` or as root or use a script which requires either, 
-and never ever under any circumstances use this to run code that you don't know or trust.
+This hopefully occured to you already, but this script can do some nasty damage if you're not careful. As 
+a precaution, **NEVER** run this with `sudo` or as root or use a script which requires either, and never 
+ever, under any circumstances, use this to run code that you don't know, understand, or trust.
 
 ```
 THE AUTHOR OF THE PROGRAM KNOWN AS cdplusplus OR cd++ (HEREAFTER "THE SCRIPT") ASSUMES NO LIABILITY 
