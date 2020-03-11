@@ -39,6 +39,10 @@ Further information on some design suggestions and useful tidbits are in the com
 script. Reading the source file is highly encouraged, as there is no help text at this time (and sourcing 
 code you aren't familiar with is a super bad idea).
 
+As a footnote, given it's scripted nature, cd++, and any functions it provides, are extremely slow compared 
+to their built-in counterparts. This slowdown, while signficant, is largely unnoticable for command-line 
+work, but could matter in a time-sensitve script, especially one that does a lot of directory-hopping.
+
 ### Options
 At the present moment, there are 3 options for changing directories:
 * cd
