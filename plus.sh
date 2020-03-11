@@ -127,3 +127,4 @@ push)
 esac
 
 unset ${!cdpp_@}
+unset -f $(compgen -A function cdpp_)
