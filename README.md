@@ -47,7 +47,7 @@ that does a lot of directory-hopping.
 
 If you introduce variables or functions in `onenter.cd`, it's prudent to unset them or undo any changes in 
 `onexit.cd`, especially if they apply strictly to that directory and its children. This is to reduce 
-inconvenient collisions with other programs on the computer. 
+inconvenient collisions with other programs on the computer, since the scripts are sourced, not sandboxed.
 
 A handy way to do this is to prefix everything in a certain script with a specific string, then run these 
 two commands in `onexit.cd`:
