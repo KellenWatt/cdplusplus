@@ -115,12 +115,12 @@ pop)
     $cdpp_builtin popd
     ;;
 push)
-    cdpp_origin=$PWD
-    cdpp_targetfile=$2  #intentionally no quotes.
+    # fails on cdpp_targetfile being empty or invalid
     $cdpp_builtin pushd $cdpp_targetfile
 
+    # if it worked, revert to the $OLDPWD, then traverse
     if [[ $? == 0 ]] ; then
-        $cdpp_builtin cd $cdpp_origin
+        $cdpp_builtin cd $OLDPWD
         cdpp_traverse $cdpp_targetfile
     fi
     ;;
