@@ -67,18 +67,19 @@ function cdpp_traverse {
         cdpp_targetfile_trimmed=${cdpp_targetfile_break[@]:$cdpp_currentdir_depth}
 
         for dir in ${cdpp_targetfile_trimmed[@]} ; do
-            $cdpp_builtin cd $dir
+            $cdpp_builtin cd "$dir"
             cdpp_onenter_hook
         done
     else
         # echo relative
         # relative filepath
-        for dir in ${cdpp_targetfile_break[@]} ; do
+        echo ${cdpp_targetfile_break[0]}
+        for dir in "${cdpp_targetfile_break[@]}" ; do
             if [[ "$dir" == ".." ]] ; then
                 cdpp_onexit_hook
             fi
 
-            $cdpp_builtin cd $dir
+            $cdpp_builtin cd "$dir"
             
             if [[ "$dir" != ".." ]] ; then
                 cdpp_onenter_hook
@@ -97,10 +98,10 @@ case $cdpp_method in
 cd)
     if [[ ! -d $cdpp_targetfile ]] ; then
         # we want this to fail like a normal cd, so attempt without activating hooks
-        $cdpp_builtin cd $cdpp_targetfile
+        $cdpp_builtin cd "$cdpp_targetfile"
     else 
         # we know the target is valid, so we can start activating hooks
-        cdpp_traverse $cdpp_targetfile
+        cdpp_traverse "$cdpp_targetfile"
     fi
     ;;
 pop)
@@ -117,12 +118,12 @@ pop)
     ;;
 push)
     # fails on cdpp_targetfile being empty or invalid
-    $cdpp_builtin pushd $cdpp_targetfile
+    $cdpp_builtin pushd "$cdpp_targetfile"
 
     # if it worked, revert to the $OLDPWD, then traverse
     if [[ $? == 0 ]] ; then
         $cdpp_builtin cd $OLDPWD
-        cdpp_traverse $cdpp_targetfile
+        cdpp_traverse "$cdpp_targetfile"
     fi
     ;;
 esac
