@@ -73,7 +73,6 @@ function cdpp_traverse {
     else
         # echo relative
         # relative filepath
-        echo ${cdpp_targetfile_break[0]}
         for dir in "${cdpp_targetfile_break[@]}" ; do
             if [[ "$dir" == ".." ]] ; then
                 cdpp_onexit_hook
@@ -96,10 +95,12 @@ cdpp_olddir=$PWD
 
 case $cdpp_method in
 cd)
-    if [[ ! -d $cdpp_targetfile ]] ; then
+    if [[ -z $cdpp_targetfile ]] ; then
+        $cdpp_builtin cd ~
+    elif [[ ! -d "$cdpp_targetfile" ]] ; then
         # we want this to fail like a normal cd, so attempt without activating hooks
         $cdpp_builtin cd "$cdpp_targetfile"
-    else 
+    else
         # we know the target is valid, so we can start activating hooks
         cdpp_traverse "$cdpp_targetfile"
     fi
