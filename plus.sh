@@ -52,35 +52,39 @@ function cdpp_onexit_hook {
 # assumes argument is a valid target
 function cdpp_traverse {
     IFS="/" read -a cdpp_targetfile_break <<< "$1"
-    cdpp_currentdir=$PWD
+    cdpp_currentdir="$PWD"
     if [[ -z ${cdpp_targetfile_break[0]} ]] ; then
         # echo absolute
         # Absolute filepath
         while [[ $1 != $cdpp_currentdir* ]] ; do
             cdpp_onexit_hook
             $cdpp_builtin cd ..
-            cdpp_currentdir=$PWD
+            cdpp_currentdir="$PWD"
         done
 
         IFS="/" read -a cdpp_tmp <<< "$cdpp_currentdir"
         cdpp_currentdir_depth=${#cdpp_tmp[@]}
-        cdpp_targetfile_trimmed=${cdpp_targetfile_break[@]:$cdpp_currentdir_depth}
+        for ((i=$cdpp_currentdir_depth; i<${#cdpp_targetfile_break[@]}; i++)) ; do
+            cdpp_targetfile_trimmed+=("${cdpp_targetfile_break[i]}")
+        done
+        # cdpp_targetfile_trimmed=("${cdpp_targetfile_break[@]:$cdpp_currentdir_depth}")
 
-        for dir in ${cdpp_targetfile_trimmed[@]} ; do
-            $cdpp_builtin cd "$dir"
+
+        for ((i=0; i<${#cdpp_targetfile_trimmed[@]}; i++)) ; do
+            $cdpp_builtin cd "${cdpp_targetfile_trimmed[i]}"
             cdpp_onenter_hook
         done
     else
         # echo relative
         # relative filepath
-        for dir in "${cdpp_targetfile_break[@]}" ; do
-            if [[ "$dir" == ".." ]] ; then
+        for ((i=0; i<${#cdpp_targetfile_break[@]}; i++)) ; do
+            if [[ "${cdpp_targetfile_break[i]}" == ".." ]] ; then
                 cdpp_onexit_hook
             fi
 
-            $cdpp_builtin cd "$dir"
+            $cdpp_builtin cd "${cdpp_targetfile_break[i]}"
             
-            if [[ "$dir" != ".." ]] ; then
+            if [[ "${cdpp_targetfile_break[i]}" != ".." ]] ; then
                 cdpp_onenter_hook
             fi
         done
@@ -90,8 +94,8 @@ function cdpp_traverse {
 
 
 cdpp_method="$1"
-cdpp_targetfile=$2
-cdpp_olddir=$PWD
+cdpp_targetfile="$2"
+cdpp_olddir="$PWD"
 
 case $cdpp_method in
 cd)
@@ -128,7 +132,7 @@ push)
     fi
     ;;
 esac
-OLDPWD=$cdpp_olddir
+OLDPWD="$cdpp_olddir"
 
 unset ${!cdpp_@}
 unset -f $(compgen -A function cdpp_)
