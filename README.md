@@ -71,11 +71,11 @@ In .bash_profile:
 ```
 # Creates alias `cd`
 # Note the -o flag, since we are overriding the existing cd
-alias cd='/<path>/<to>/plus.sh -o cd'
+alias cd='source /<path>/<to>/plus.sh -o cd'
 
 # Creates option for `pushd`
 # Change push to pop for `popd`
-alias push='/<path>/<to>/plus.sh push'
+alias push='source /<path>/<to>/plus.sh push'
 ```
 
 # WARNING
