@@ -100,7 +100,7 @@ cdpp_olddir="$PWD"
 case $cdpp_method in
 cd)
     if [[ -z $cdpp_targetfile ]] ; then
-        $cdpp_builtin cd ~
+        cdpp_traverse "$HOME"
     elif [[ ! -d "$cdpp_targetfile" ]] ; then
         # we want this to fail like a normal cd, so attempt without activating hooks
         $cdpp_builtin cd "$cdpp_targetfile"
