@@ -127,7 +127,7 @@ push)
 
     # if it worked, revert to the $OLDPWD, then traverse
     if [[ $? == 0 ]] ; then
-        $cdpp_builtin cd $OLDPWD
+        $cdpp_builtin cd "$OLDPWD"
         cdpp_traverse "$cdpp_targetfile"
     fi
     ;;
